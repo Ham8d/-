@@ -12,11 +12,16 @@ workflows:
           git clone --recursive https://github.com/theos/theos.git $THEOS
       - name: Build Dylib
         script: |
-          # البحث عن المجلد الذي يحتوي على Makefile والدخول إليه
-          MAKEFILE_DIR=$(find . -name "Makefile" -not -path "*/theos/*" -exec dirname {} \;)
-          cd "$MAKEFILE_DIR"
-          echo "Building in directory: $(pwd)"
+          echo "======================================"
+          echo "📂 قائمة الملفات الموجودة في المستودع:"
+          ls -la
+          echo "======================================"
           
+          # البحث عن ملفات Objective-C المرفوعة
+          echo "🔍 البحث عن أي ملف برمجي ينتهي بـ .m أو .xm:"
+          find . -maxdepth 2 -type f \( -name "*.m" -o -name "*.xm" \)
+          echo "======================================"
+
           make clean
           make PACKAGE_FORMAT=ipa
     artifacts:
