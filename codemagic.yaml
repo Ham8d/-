@@ -1,0 +1,19 @@
+workflows:
+  build-dylib:
+    name: Build Tweak Dylib
+    max_build_duration: 30
+    instance_type: mac_mini_m1
+    environment:
+      vars:
+        THEOS: $CM_BUILD_DIR/theos
+    scripts:
+      - name: Install Dependencies & Theos
+        script: |
+          git clone --recursive https://github.com/theos/theos.git $THEOS
+      - name: Build Dylib
+        script: |
+          make clean
+          make PACKAGE_FORMAT=ipa
+    artifacts:
+      - .theos/obj/debug/*.dylib
+      - .theos/obj/*.dylib
