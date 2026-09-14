@@ -5,7 +5,7 @@ include $(THEOS)/makefiles/common.mk
 
 TWEAK_NAME = TurathAlert
 
-TurathAlert_FILES = Tweak.m
+TurathAlert_FILES = main.m
 TurathAlert_CFLAGS = -fobjc-arc
 TurathAlert_FRAMEWORKS = UIKit
 
