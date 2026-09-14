@@ -4,7 +4,7 @@ static NSString * const kAlertTitle      = @"اســتـمـتـع";
 static NSString * const kAlertMessage    = @"التراث ستور عالم خيالي من تطبيقات";
 static NSString * const kButtonJoinTitle = @"انضم هنا للحصول ع المميزات";
 static NSString * const kButtonOKTitle   = @"حسناً";
-static NSString * const kChannelURL      = @"https://t.me/turath_st";
+static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
 
 __attribute__((constructor))
 static void initTweak(void) {
