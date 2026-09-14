@@ -10,7 +10,7 @@ static NSString * const kButtonJoinTitle = @"تفعيل المميزات ☑";
 static NSString * const kButtonOKTitle   = @"حسناً";
 static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
 static NSString * const kFallbackURL     = @"https://t.me/turath_st";
-static NSString * const kGifURL          = @"https://raw.githubusercontent.com/Ham8d/Stcker.gif/refs/heads/main/IMG_6668.gif";
+static NSString * const kGifURL          = @"https://raw.githubusercontent.com/Ham8d/Stcker.gif/refs/heads/main/IMG_6672.gif";
 // ==========================================
 
 // دالة مساعدة لتحويل بيانات الـ GIF إلى صور متحركة أصلية في iOS
@@ -103,13 +103,20 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
     headerContainer.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:headerContainer];
 
-    // استخدام UIImageView الحقيقي لتحميل وعرض الملصق المتحرك
+    // العنوان أولاً ليكون في الجهة المقابلة
+    UILabel *titleLabel = [[UILabel alloc] init];
+    titleLabel.text = kAlertTitle;
+    titleLabel.font = [UIFont boldSystemFontOfSize:22];
+    titleLabel.textColor = [UIColor colorWithRed:0.40 green:0.65 blue:0.95 alpha:1.0];
+    titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
+    [headerContainer addSubview:titleLabel];
+
+    // الملصق المتحرك بحجم أكبر بـ 10% (35x35) وفي الجهة الأخرى
     UIImageView *gifImageView = [[UIImageView alloc] init];
     gifImageView.contentMode = UIViewContentModeScaleAspectFit;
     gifImageView.translatesAutoresizingMaskIntoConstraints = NO;
     [headerContainer addSubview:gifImageView];
 
-    // جلب بيانات الـ GIF في الخلفية لتشغيل فوري وسلس
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         NSData *gifData = [NSData dataWithContentsOfURL:[NSURL URLWithString:kGifURL]];
         if (gifData) {
@@ -119,13 +126,6 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
             });
         }
     });
-
-    UILabel *titleLabel = [[UILabel alloc] init];
-    titleLabel.text = kAlertTitle;
-    titleLabel.font = [UIFont boldSystemFontOfSize:22];
-    titleLabel.textColor = [UIColor colorWithRed:0.40 green:0.65 blue:0.95 alpha:1.0];
-    titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    [headerContainer addSubview:titleLabel];
 
     UILabel *msgLabel = [[UILabel alloc] init];
     msgLabel.text = kAlertMessage;
@@ -174,16 +174,18 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
 
         [headerContainer.topAnchor constraintEqualToAnchor:dotsContainer.bottomAnchor constant:10],
         [headerContainer.centerXAnchor constraintEqualToAnchor:alertView.centerXAnchor],
-        [headerContainer.heightAnchor constraintEqualToConstant:32],
+        [headerContainer.heightAnchor constraintEqualToConstant:35],
 
-        [gifImageView.leadingAnchor constraintEqualToAnchor:headerContainer.leadingAnchor],
-        [gifImageView.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
-        [gifImageView.widthAnchor constraintEqualToConstant:32],
-        [gifImageView.heightAnchor constraintEqualToConstant:32],
-
-        [titleLabel.leadingAnchor constraintEqualToAnchor:gifImageView.trailingAnchor constant:8],
-        [titleLabel.trailingAnchor constraintEqualToAnchor:headerContainer.trailingAnchor],
+        // Title Label في البداية
+        [titleLabel.leadingAnchor constraintEqualToAnchor:headerContainer.leadingAnchor],
         [titleLabel.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
+
+        // GIF Image بجانب العنوان من الجهة الأخرى وبحجم 35x35
+        [gifImageView.leadingAnchor constraintEqualToAnchor:titleLabel.trailingAnchor constant:8],
+        [gifImageView.trailingAnchor constraintEqualToAnchor:headerContainer.trailingAnchor],
+        [gifImageView.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
+        [gifImageView.widthAnchor constraintEqualToConstant:35],
+        [gifImageView.heightAnchor constraintEqualToConstant:35],
 
         [msgLabel.topAnchor constraintEqualToAnchor:headerContainer.bottomAnchor constant:12],
         [msgLabel.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor constant:16],
