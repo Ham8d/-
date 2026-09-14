@@ -5,9 +5,9 @@
 // ==========================================
 static NSString * const kAlertTitle      = @"اســتـمـتـع";
 static NSString * const kAlertMessage    = @"التراث ستور عالم خيالي من تطبيقات";
-static NSString * const kButtonJoinTitle = @"انضم هنا للحصول ع المميزات";
+static NSString * const kButtonJoinTitle = @"☑ تفعيل المميزات";
 static NSString * const kButtonOKTitle   = @"حسناً";
-static NSString * const kChannelURL      = @"https://t.me/turath_st";
+static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
 // ==========================================
 
 @interface CustomTurathAlertView : UIView
@@ -65,7 +65,7 @@ static NSString * const kChannelURL      = @"https://t.me/turath_st";
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = kAlertTitle;
     titleLabel.font = [UIFont boldSystemFontOfSize:22];
-    titleLabel.textColor = [UIColor colorWithRed:0.45 green:0.85 blue:0.65 alpha:1.0]; // لون الأخضر النعناعي المميز
+    titleLabel.textColor = [UIColor colorWithRed:0.08 green:0.18 blue:0.36 alpha:1.0];
     titleLabel.textAlignment = NSTextAlignmentCenter;
     titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:titleLabel];
