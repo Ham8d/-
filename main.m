@@ -8,6 +8,7 @@ static NSString * const kAlertMessage    = @"التراث ستور عالم خي
 static NSString * const kButtonJoinTitle = @"تفعيل المميزات ☑";
 static NSString * const kButtonOKTitle   = @"حسناً";
 static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
+static NSString * const kFallbackURL     = @"https://t.me/turath_st";
 // ==========================================
 
 @interface CustomTurathAlertView : UIView
@@ -61,7 +62,7 @@ static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
         [dotsContainer addSubview:dot];
     }
 
-    // 2. Title Label (Mint / Gold Highlight)
+    // 2. Title Label (Light Blue / Navy Highlight)
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = kAlertTitle;
     titleLabel.font = [UIFont boldSystemFontOfSize:22];
@@ -169,9 +170,13 @@ static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
 }
 
 + (void)didTapJoin:(UIButton *)sender {
-    NSURL *url = [NSURL URLWithString:kChannelURL];
-    if ([[UIApplication sharedApplication] canOpenURL:url]) {
-        [[UIApplication sharedApplication] openURL:url options:@{} completionHandler:nil];
+    NSURL *primaryURL = [NSURL URLWithString:kChannelURL];
+    NSURL *fallbackURL = [NSURL URLWithString:kFallbackURL];
+
+    if ([[UIApplication sharedApplication] canOpenURL:primaryURL]) {
+        [[UIApplication sharedApplication] openURL:primaryURL options:@{} completionHandler:nil];
+    } else {
+        [[UIApplication sharedApplication] openURL:fallbackURL options:@{} completionHandler:nil];
     }
 }
 
