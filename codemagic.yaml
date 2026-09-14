@@ -12,8 +12,14 @@ workflows:
           git clone --recursive https://github.com/theos/theos.git $THEOS
       - name: Build Dylib
         script: |
+          # البحث عن المجلد الذي يحتوي على Makefile والدخول إليه
+          MAKEFILE_DIR=$(find . -name "Makefile" -not -path "*/theos/*" -exec dirname {} \;)
+          cd "$MAKEFILE_DIR"
+          echo "Building in directory: $(pwd)"
+          
           make clean
           make PACKAGE_FORMAT=ipa
     artifacts:
-      - .theos/obj/debug/*.dylib
-      - .theos/obj/*.dylib
+      - "**/.theos/obj/debug/*.dylib"
+      - "**/.theos/obj/*.dylib"
+      - "**/*.dylib"
