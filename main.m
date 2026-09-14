@@ -4,7 +4,7 @@
 // ==========================================
 // ✏️ قسم التعديل السريع (المعلومات والروابط)
 // ==========================================
-static NSString * const kAlertTitle      = @"اســتـمـتـع ";
+static NSString * const kAlertTitle      = @"  اســتـمـتـع";
 static NSString * const kAlertMessage    = @"التراث ستور عالم خيالي من تطبيقات";
 static NSString * const kButtonJoinTitle = @"تفعيل المميزات ☑";
 static NSString * const kButtonOKTitle   = @"حسناً";
