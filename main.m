@@ -1,5 +1,5 @@
 #import <UIKit/UIKit.h>
-#import <WebKit/WebKit.h>
+#import <ImageIO/ImageIO.h>
 
 // ==========================================
 // ✏️ قسم التعديل السريع (المعلومات والروابط)
@@ -12,6 +12,45 @@ static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
 static NSString * const kFallbackURL     = @"https://t.me/turath_st";
 static NSString * const kGifURL          = @"https://raw.githubusercontent.com/Ham8d/Stcker.gif/refs/heads/main/IMG_6668.gif";
 // ==========================================
+
+// دالة مساعدة لتحويل بيانات الـ GIF إلى صور متحركة أصلية في iOS
+@interface UIImage (AnimatedGIF)
++ * (UIImage *)animatedImageWithAnimatedGIFData:(NSData *)data;
+@end
+
+@implementation UIImage (AnimatedGIF)
++ (UIImage *)animatedImageWithAnimatedGIFData:(NSData *)data {
+    if (!data) return nil;
+    CGImageSourceRef source = CGImageSourceCreateWithData((__bridge CFDataRef)data, NULL);
+    size_t count = CGImageSourceGetCount(source);
+    if (count <= 1) {
+        if (source) CFRelease(source);
+        return [[UIImage alloc] initWithData:data];
+    }
+    NSMutableArray *images = [NSMutableArray array];
+    NSTimeInterval duration = 0.0f;
+    for (size_t i = 0; i < count; i++) {
+        CGImageRef image = CGImageSourceCreateImageAtIndex(source, i, NULL);
+        if (!image) continue;
+        
+        NSDictionary *dict = (__bridge NSDictionary *)CGImageSourceCopyPropertiesAtIndex(source, i, NULL);
+        NSDictionary *gifDict = dict[(NSString *)kCGImagePropertyGIFDictionary];
+        NSNumber *delayTime = gifDict[(NSString *)kCGImagePropertyGIFUnclampedDelayTime];
+        if (!delayTime) {
+            delayTime = gifDict[(NSString *)kCGImagePropertyGIFDelayTime];
+        }
+        duration += [delayTime doubleValue];
+        [images addObjectsFromArray:@[[UIImage imageWithCGImage:image]]];
+        CGImageRelease(image);
+    }
+    if (duration <= 0.0f) {
+        duration = (1.0f / 10.0f) * count;
+    }
+    UIImage *animatedImage = [UIImage animatedImageWithImages:images duration:duration];
+    if (source) CFRelease(source);
+    return animatedImage;
+}
+@end
 
 @interface CustomTurathAlertView : UIView
 @end
@@ -28,33 +67,29 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
     }
     if (!keyWindow) return;
 
-    // تجنب تكرار عرض النافذة إذا كانت معروضة بالفعل
     if ([keyWindow viewWithTag:998877]) return;
 
-    // Dimmed Background Container
     UIView *bgOverlay = [[UIView alloc] initWithFrame:keyWindow.bounds];
     bgOverlay.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.6];
     bgOverlay.tag = 998877;
     bgOverlay.alpha = 0.0;
 
-    // Main Alert Container View (Dark Navy Theme)
     CGFloat alertWidth = MIN(keyWindow.bounds.size.width - 50, 340);
     UIView *alertView = [[UIView alloc] init];
-    alertView.backgroundColor = [UIColor colorWithRed:0.11 green:0.13 blue:0.16 alpha:1.0]; // كحلي داكن احترافي
+    alertView.backgroundColor = [UIColor colorWithRed:0.11 green:0.13 blue:0.16 alpha:1.0];
     alertView.layer.cornerRadius = 18;
     alertView.layer.masksToBounds = YES;
     alertView.translatesAutoresizingMaskIntoConstraints = NO;
     [bgOverlay addSubview:alertView];
 
-    // 1. Top Bar with Traffic Light Dots (Red, Yellow, Green)
     UIView *dotsContainer = [[UIView alloc] init];
     dotsContainer.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:dotsContainer];
 
     NSArray *dotColors = @[
-        [UIColor colorWithRed:0.98 green:0.36 blue:0.35 alpha:1.0], // Red
-        [UIColor colorWithRed:0.99 green:0.76 blue:0.18 alpha:1.0], // Yellow
-        [UIColor colorWithRed:0.24 green:0.78 blue:0.36 alpha:1.0]  // Green
+        [UIColor colorWithRed:0.98 green:0.36 blue:0.35 alpha:1.0],
+        [UIColor colorWithRed:0.99 green:0.76 blue:0.18 alpha:1.0],
+        [UIColor colorWithRed:0.24 green:0.78 blue:0.36 alpha:1.0]
     ];
 
     for (int i = 0; i < 3; i++) {
@@ -64,26 +99,27 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
         [dotsContainer addSubview:dot];
     }
 
-    // Header Container (Holds GIF Sticker + Title together side-by-side)
     UIView *headerContainer = [[UIView alloc] init];
     headerContainer.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:headerContainer];
 
-    // GIF Sticker View (Using WKWebView for smooth animated GIF playback)
-    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
-    config.allowsInlineMediaPlayback = YES;
-    WKWebView *gifWebView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:config];
-    gifWebView.backgroundColor = [UIColor clearColor];
-    gifWebView.opaque = NO;
-    gifWebView.scrollView.scrollEnabled = NO;
-    gifWebView.userInteractionEnabled = NO;
-    gifWebView.translatesAutoresizingMaskIntoConstraints = NO;
-    
-    NSString *htmlString = [NSString stringWithFormat:@"<html><body style='margin:0;padding:0;background-color:transparent;display:flex;justify-content:center;align-items:center;'><img src='%@' style='width:32px;height:32px;object-fit:contain;'/></body></html>", kGifURL];
-    [gifWebView loadHTMLString:htmlString baseURL:nil];
-    [headerContainer addSubview:gifWebView];
+    // استخدام UIImageView الحقيقي لتحميل وعرض الملصق المتحرك
+    UIImageView *gifImageView = [[UIImageView alloc] init];
+    gifImageView.contentMode = UIViewContentModeScaleAspectFit;
+    gifImageView.translatesAutoresizingMaskIntoConstraints = NO;
+    [headerContainer addSubview:gifImageView];
 
-    // 2. Title Label (Light Blue / Navy Highlight)
+    // جلب بيانات الـ GIF في الخلفية لتشغيل فوري وسلس
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSData *gifData = [NSData dataWithContentsOfURL:[NSURL URLWithString:kGifURL]];
+        if (gifData) {
+            UIImage *gifImage = [UIImage animatedImageWithAnimatedGIFData:gifData];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                gifImageView.image = gifImage;
+            });
+        }
+    });
+
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = kAlertTitle;
     titleLabel.font = [UIFont boldSystemFontOfSize:22];
@@ -91,7 +127,6 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
     titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [headerContainer addSubview:titleLabel];
 
-    // 3. Message Label
     UILabel *msgLabel = [[UILabel alloc] init];
     msgLabel.text = kAlertMessage;
     msgLabel.font = [UIFont systemFontOfSize:15 weight:UIFontWeightMedium];
@@ -101,28 +136,24 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
     msgLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:msgLabel];
 
-    // Separator Line 1
     UIView *sep1 = [[UIView alloc] init];
     sep1.backgroundColor = [UIColor colorWithWhite:0.25 alpha:0.5];
     sep1.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:sep1];
 
-    // 4. Join Channel Button
     UIButton *joinBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     [joinBtn setTitle:kButtonJoinTitle forState:UIControlStateNormal];
-    [joinBtn setTitleColor:[UIColor colorWithRed:0.38 green:0.68 blue:0.98 alpha:1.0] forState:UIControlStateNormal]; // أزرق بارز
+    [joinBtn setTitleColor:[UIColor colorWithRed:0.38 green:0.68 blue:0.98 alpha:1.0] forState:UIControlStateNormal];
     joinBtn.titleLabel.font = [UIFont systemFontOfSize:16 weight:UIFontWeightSemibold];
     joinBtn.translatesAutoresizingMaskIntoConstraints = NO;
     [joinBtn addTarget:self action:@selector(didTapJoin:) forControlEvents:UIControlEventTouchUpInside];
     [alertView addSubview:joinBtn];
 
-    // Separator Line 2
     UIView *sep2 = [[UIView alloc] init];
     sep2.backgroundColor = [UIColor colorWithWhite:0.25 alpha:0.5];
     sep2.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:sep2];
 
-    // 5. Dismiss Button
     UIButton *okBtn = [UIButton buttonWithType:UIButtonTypeSystem];
     [okBtn setTitle:kButtonOKTitle forState:UIControlStateNormal];
     [okBtn setTitleColor:[UIColor colorWithRed:0.38 green:0.68 blue:0.98 alpha:1.0] forState:UIControlStateNormal];
@@ -131,58 +162,48 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
     [okBtn addTarget:self action:@selector(didTapDismiss:) forControlEvents:UIControlEventTouchUpInside];
     [alertView addSubview:okBtn];
 
-    // Auto Layout Constraints Setup
     [NSLayoutConstraint activateConstraints:@[
         [alertView.centerXAnchor constraintEqualToAnchor:bgOverlay.centerXAnchor],
         [alertView.centerYAnchor constraintEqualToAnchor:bgOverlay.centerYAnchor],
         [alertView.widthAnchor constraintEqualToConstant:alertWidth],
 
-        // Dots Container
         [dotsContainer.topAnchor constraintEqualToAnchor:alertView.topAnchor constant:14],
         [dotsContainer.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor constant:16],
         [dotsContainer.widthAnchor constraintEqualToConstant:50],
         [dotsContainer.heightAnchor constraintEqualToConstant:12],
 
-        // Header Container (GIF + Title)
         [headerContainer.topAnchor constraintEqualToAnchor:dotsContainer.bottomAnchor constant:10],
         [headerContainer.centerXAnchor constraintEqualToAnchor:alertView.centerXAnchor],
         [headerContainer.heightAnchor constraintEqualToConstant:32],
 
-        // GIF WebView inside Header
-        [gifWebView.leadingAnchor constraintEqualToAnchor:headerContainer.leadingAnchor],
-        [gifWebView.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
-        [gifWebView.widthAnchor constraintEqualToConstant:32],
-        [gifWebView.heightAnchor constraintEqualToConstant:32],
+        [gifImageView.leadingAnchor constraintEqualToAnchor:headerContainer.leadingAnchor],
+        [gifImageView.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
+        [gifImageView.widthAnchor constraintEqualToConstant:32],
+        [gifImageView.heightAnchor constraintEqualToConstant:32],
 
-        // Title Label inside Header (Next to GIF)
-        [titleLabel.leadingAnchor constraintEqualToAnchor:gifWebView.trailingAnchor constant:8],
+        [titleLabel.leadingAnchor constraintEqualToAnchor:gifImageView.trailingAnchor constant:8],
         [titleLabel.trailingAnchor constraintEqualToAnchor:headerContainer.trailingAnchor],
         [titleLabel.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
 
-        // Message
         [msgLabel.topAnchor constraintEqualToAnchor:headerContainer.bottomAnchor constant:12],
         [msgLabel.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor constant:16],
         [msgLabel.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor constant:-16],
 
-        // Sep 1
         [sep1.topAnchor constraintEqualToAnchor:msgLabel.bottomAnchor constant:18],
         [sep1.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor],
         [sep1.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor],
         [sep1.heightAnchor constraintEqualToConstant:0.5],
 
-        // Join Button
         [joinBtn.topAnchor constraintEqualToAnchor:sep1.bottomAnchor],
         [joinBtn.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor],
         [joinBtn.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor],
         [joinBtn.heightAnchor constraintEqualToConstant:48],
 
-        // Sep 2
         [sep2.topAnchor constraintEqualToAnchor:joinBtn.bottomAnchor],
         [sep2.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor],
         [sep2.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor],
         [sep2.heightAnchor constraintEqualToConstant:0.5],
 
-        // OK Button
         [okBtn.topAnchor constraintEqualToAnchor:sep2.bottomAnchor],
         [okBtn.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor],
         [okBtn.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor],
@@ -192,7 +213,6 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
 
     [keyWindow addSubview:bgOverlay];
 
-    // Animation Fade In & Scale Up
     alertView.transform = CGAffineTransformMakeScale(0.85, 0.85);
     [UIView animateWithDuration:0.25 animations:^{
         bgOverlay.alpha = 1.0;
