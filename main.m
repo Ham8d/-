@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import <WebKit/WebKit.h>
 
 // ==========================================
 // ✏️ قسم التعديل السريع (المعلومات والروابط)
@@ -9,6 +10,7 @@ static NSString * const kButtonJoinTitle = @"تفعيل المميزات ☑";
 static NSString * const kButtonOKTitle   = @"حسناً";
 static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
 static NSString * const kFallbackURL     = @"https://t.me/turath_st";
+static NSString * const kGifURL          = @"https://raw.githubusercontent.com/Ham8d/Stcker.gif/refs/heads/main/IMG_6668.gif";
 // ==========================================
 
 @interface CustomTurathAlertView : UIView
@@ -62,14 +64,32 @@ static NSString * const kFallbackURL     = @"https://t.me/turath_st";
         [dotsContainer addSubview:dot];
     }
 
+    // Header Container (Holds GIF Sticker + Title together side-by-side)
+    UIView *headerContainer = [[UIView alloc] init];
+    headerContainer.translatesAutoresizingMaskIntoConstraints = NO;
+    [alertView addSubview:headerContainer];
+
+    // GIF Sticker View (Using WKWebView for smooth animated GIF playback)
+    WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
+    config.allowsInlineMediaPlayback = YES;
+    WKWebView *gifWebView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:config];
+    gifWebView.backgroundColor = [UIColor clearColor];
+    gifWebView.opaque = NO;
+    gifWebView.scrollView.scrollEnabled = NO;
+    gifWebView.userInteractionEnabled = NO;
+    gifWebView.translatesAutoresizingMaskIntoConstraints = NO;
+    
+    NSString *htmlString = [NSString stringWithFormat:@"<html><body style='margin:0;padding:0;background-color:transparent;display:flex;justify-content:center;align-items:center;'><img src='%@' style='width:32px;height:32px;object-fit:contain;'/></body></html>", kGifURL];
+    [gifWebView loadHTMLString:htmlString baseURL:nil];
+    [headerContainer addSubview:gifWebView];
+
     // 2. Title Label (Light Blue / Navy Highlight)
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = kAlertTitle;
     titleLabel.font = [UIFont boldSystemFontOfSize:22];
     titleLabel.textColor = [UIColor colorWithRed:0.40 green:0.65 blue:0.95 alpha:1.0];
-    titleLabel.textAlignment = NSTextAlignmentCenter;
     titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    [alertView addSubview:titleLabel];
+    [headerContainer addSubview:titleLabel];
 
     // 3. Message Label
     UILabel *msgLabel = [[UILabel alloc] init];
@@ -123,13 +143,24 @@ static NSString * const kFallbackURL     = @"https://t.me/turath_st";
         [dotsContainer.widthAnchor constraintEqualToConstant:50],
         [dotsContainer.heightAnchor constraintEqualToConstant:12],
 
-        // Title
-        [titleLabel.topAnchor constraintEqualToAnchor:dotsContainer.bottomAnchor constant:10],
-        [titleLabel.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor constant:16],
-        [titleLabel.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor constant:-16],
+        // Header Container (GIF + Title)
+        [headerContainer.topAnchor constraintEqualToAnchor:dotsContainer.bottomAnchor constant:10],
+        [headerContainer.centerXAnchor constraintEqualToAnchor:alertView.centerXAnchor],
+        [headerContainer.heightAnchor constraintEqualToConstant:32],
+
+        // GIF WebView inside Header
+        [gifWebView.leadingAnchor constraintEqualToAnchor:headerContainer.leadingAnchor],
+        [gifWebView.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
+        [gifWebView.widthAnchor constraintEqualToConstant:32],
+        [gifWebView.heightAnchor constraintEqualToConstant:32],
+
+        // Title Label inside Header (Next to GIF)
+        [titleLabel.leadingAnchor constraintEqualToAnchor:gifWebView.trailingAnchor constant:8],
+        [titleLabel.trailingAnchor constraintEqualToAnchor:headerContainer.trailingAnchor],
+        [titleLabel.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
 
         // Message
-        [msgLabel.topAnchor constraintEqualToAnchor:titleLabel.bottomAnchor constant:10],
+        [msgLabel.topAnchor constraintEqualToAnchor:headerContainer.bottomAnchor constant:12],
         [msgLabel.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor constant:16],
         [msgLabel.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor constant:-16],
 
