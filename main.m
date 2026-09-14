@@ -4,7 +4,7 @@
 // ==========================================
 // ✏️ قسم التعديل السريع (المعلومات والروابط)
 // ==========================================
-static NSString * const kAlertTitle      = @"اســتـمـتـع";
+static NSString * const kAlertTitle      = @"اســتـمـتـع ";
 static NSString * const kAlertMessage    = @"التراث ستور عالم خيالي من تطبيقات";
 static NSString * const kButtonJoinTitle = @"تفعيل المميزات ☑";
 static NSString * const kButtonOKTitle   = @"حسناً";
@@ -103,7 +103,6 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
     headerContainer.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:headerContainer];
 
-    // العنوان أولاً ليكون في الجهة المقابلة
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = kAlertTitle;
     titleLabel.font = [UIFont boldSystemFontOfSize:22];
@@ -111,7 +110,7 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
     titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [headerContainer addSubview:titleLabel];
 
-    // الملصق المتحرك بحجم أكبر بـ 10% (35x35) وفي الجهة الأخرى
+    // الملصق المتحرك بحجم مضاعف 100% (70x70)
     UIImageView *gifImageView = [[UIImageView alloc] init];
     gifImageView.contentMode = UIViewContentModeScaleAspectFit;
     gifImageView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -174,18 +173,16 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
 
         [headerContainer.topAnchor constraintEqualToAnchor:dotsContainer.bottomAnchor constant:10],
         [headerContainer.centerXAnchor constraintEqualToAnchor:alertView.centerXAnchor],
-        [headerContainer.heightAnchor constraintEqualToConstant:35],
+        [headerContainer.heightAnchor constraintEqualToConstant:70],
 
-        // Title Label في البداية
         [titleLabel.leadingAnchor constraintEqualToAnchor:headerContainer.leadingAnchor],
         [titleLabel.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
 
-        // GIF Image بجانب العنوان من الجهة الأخرى وبحجم 35x35
         [gifImageView.leadingAnchor constraintEqualToAnchor:titleLabel.trailingAnchor constant:8],
         [gifImageView.trailingAnchor constraintEqualToAnchor:headerContainer.trailingAnchor],
         [gifImageView.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
-        [gifImageView.widthAnchor constraintEqualToConstant:35],
-        [gifImageView.heightAnchor constraintEqualToConstant:35],
+        [gifImageView.widthAnchor constraintEqualToConstant:70],
+        [gifImageView.heightAnchor constraintEqualToConstant:70],
 
         [msgLabel.topAnchor constraintEqualToAnchor:headerContainer.bottomAnchor constant:12],
         [msgLabel.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor constant:16],
