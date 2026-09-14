@@ -9,21 +9,12 @@ workflows:
     scripts:
       - name: Install Dependencies & Theos
         script: |
+          brew install ldid
           git clone --recursive https://github.com/theos/theos.git $THEOS
       - name: Build Dylib
         script: |
-          echo "======================================"
-          echo "📂 قائمة الملفات الموجودة في المستودع:"
-          ls -la
-          echo "======================================"
-          
-          # البحث عن ملفات Objective-C المرفوعة
-          echo "🔍 البحث عن أي ملف برمجي ينتهي بـ .m أو .xm:"
-          find . -maxdepth 2 -type f \( -name "*.m" -o -name "*.xm" \)
-          echo "======================================"
-
           make clean
-          make PACKAGE_FORMAT=ipa
+          make
     artifacts:
       - "**/.theos/obj/debug/*.dylib"
       - "**/.theos/obj/*.dylib"
