@@ -15,7 +15,7 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
 
 // دالة مساعدة لتحويل بيانات الـ GIF إلى صور متحركة أصلية في iOS
 @interface UIImage (AnimatedGIF)
-+ * (UIImage *)animatedImageWithAnimatedGIFData:(NSData *)data;
++ (UIImage *)animatedImageWithAnimatedGIFData:(NSData *)data;
 @end
 
 @implementation UIImage (AnimatedGIF)
