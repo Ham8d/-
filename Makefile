@@ -9,6 +9,6 @@ TWEAK_NAME = TurathAlert
 
 TurathAlert_FILES = main.m
 TurathAlert_CFLAGS = -fobjc-arc
-TurathAlert_FRAMEWORKS = UIKit CoreGraphics WebKit
+TurathAlert_FRAMEWORKS = UIKit CoreGraphics ImageIO
 
 include $(THEOS)/makefiles/tweak.mk
