@@ -65,7 +65,7 @@ static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = kAlertTitle;
     titleLabel.font = [UIFont boldSystemFontOfSize:22];
-    titleLabel.textColor = [UIColor colorWithRed:0.08 green:0.18 blue:0.36 alpha:1.0];
+    titleLabel.textColor = [UIColor colorWithRed:0.40 green:0.65 blue:0.95 alpha:1.0];
     titleLabel.textAlignment = NSTextAlignmentCenter;
     titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:titleLabel];
