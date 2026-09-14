@@ -4,7 +4,7 @@
 // ==========================================
 // ✏️ قسم التعديل السريع (المعلومات والروابط)
 // ==========================================
-static NSString * const kAlertTitle      = @"اســتـمـتـع    ";
+static NSString * const kAlertTitle      = @"اســتـمـتـع";
 static NSString * const kAlertMessage    = @"التراث ستور عالم خيالي من تطبيقات";
 static NSString * const kButtonJoinTitle = @"تفعيل المميزات ☑";
 static NSString * const kButtonOKTitle   = @"حسناً";
@@ -99,6 +99,7 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
         [dotsContainer addSubview:dot];
     }
 
+    // حاوية تجمع الكلمة والملصق لتتوسط النافذة تماماً وتلتصق ببعضها
     UIView *headerContainer = [[UIView alloc] init];
     headerContainer.translatesAutoresizingMaskIntoConstraints = NO;
     [alertView addSubview:headerContainer];
@@ -110,7 +111,6 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
     titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [headerContainer addSubview:titleLabel];
 
-    // الملصق المتحرك بحجم مضاعف 100% (70x70)
     UIImageView *gifImageView = [[UIImageView alloc] init];
     gifImageView.contentMode = UIViewContentModeScaleAspectFit;
     gifImageView.translatesAutoresizingMaskIntoConstraints = NO;
@@ -171,14 +171,17 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
         [dotsContainer.widthAnchor constraintEqualToConstant:50],
         [dotsContainer.heightAnchor constraintEqualToConstant:12],
 
+        // Header Container يتوسط النافذة أفقياً بشكل دقيق
         [headerContainer.topAnchor constraintEqualToAnchor:dotsContainer.bottomAnchor constant:10],
         [headerContainer.centerXAnchor constraintEqualToAnchor:alertView.centerXAnchor],
         [headerContainer.heightAnchor constraintEqualToConstant:70],
 
+        // العنوان يبدأ من بداية الحاوية بداخلها
         [titleLabel.leadingAnchor constraintEqualToAnchor:headerContainer.leadingAnchor],
         [titleLabel.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
 
-        [gifImageView.leadingAnchor constraintEqualToAnchor:titleLabel.trailingAnchor constant:8],
+        // الملصق مجاور تماماً للكلمة بمسافة صغيرة جداً (4 بكسل)
+        [gifImageView.leadingAnchor constraintEqualToAnchor:titleLabel.trailingAnchor constant:4],
         [gifImageView.trailingAnchor constraintEqualToAnchor:headerContainer.trailingAnchor],
         [gifImageView.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
         [gifImageView.widthAnchor constraintEqualToConstant:70],
