@@ -11,6 +11,7 @@ static NSString * const kButtonOKTitle   = @"حسناً";
 static NSString * const kChannelURL      = @"tg://resolve?domain=turath_st";
 static NSString * const kFallbackURL     = @"https://t.me/turath_st";
 static NSString * const kGifURL          = @"https://raw.githubusercontent.com/Ham8d/Stcker.gif/refs/heads/main/IMG_6672.gif";
+static NSData *gSharedGifData            = nil;
 // ==========================================
 
 // دالة مساعدة لتحويل بيانات الـ GIF إلى صور متحركة أصلية في iOS
@@ -99,32 +100,39 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
         [dotsContainer addSubview:dot];
     }
 
-    // حاوية تجمع الكلمة والملصق لتتوسط النافذة تماماً وتلتصق ببعضها
-    UIView *headerContainer = [[UIView alloc] init];
-    headerContainer.translatesAutoresizingMaskIntoConstraints = NO;
-    [alertView addSubview:headerContainer];
-
+    // استخدام UIStackView لربط الكلمة والملصق معاً بمسافة قريبة ومتوسطة تماماً
     UILabel *titleLabel = [[UILabel alloc] init];
     titleLabel.text = kAlertTitle;
     titleLabel.font = [UIFont boldSystemFontOfSize:22];
     titleLabel.textColor = [UIColor colorWithRed:0.40 green:0.65 blue:0.95 alpha:1.0];
-    titleLabel.translatesAutoresizingMaskIntoConstraints = NO;
-    [headerContainer addSubview:titleLabel];
 
     UIImageView *gifImageView = [[UIImageView alloc] init];
     gifImageView.contentMode = UIViewContentModeScaleAspectFit;
-    gifImageView.translatesAutoresizingMaskIntoConstraints = NO;
-    [headerContainer addSubview:gifImageView];
+    [gifImageView.widthAnchor constraintEqualToConstant:70].active = YES;
+    [gifImageView.heightAnchor constraintEqualToConstant:70].active = YES;
 
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        NSData *gifData = [NSData dataWithContentsOfURL:[NSURL URLWithString:kGifURL]];
-        if (gifData) {
-            UIImage *gifImage = [UIImage animatedImageWithAnimatedGIFData:gifData];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                gifImageView.image = gifImage;
-            });
-        }
-    });
+    // عرض الصورة المحملة مسبقاً فوراً إن وجدت، أو تحميلها في حال لم تكتمل
+    if (gSharedGifData) {
+        gifImageView.image = [UIImage animatedImageWithAnimatedGIFData:gSharedGifData];
+    } else {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:kGifURL]];
+            if (data) {
+                gSharedGifData = data;
+                UIImage *img = [UIImage animatedImageWithAnimatedGIFData:data];
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    gifImageView.image = img;
+                });
+            }
+        });
+    }
+
+    UIStackView *headerStack = [[UIStackView alloc] initWithArrangedSubviews:@[titleLabel, gifImageView]];
+    headerStack.axis = UILayoutConstraintAxisHorizontal;
+    headerStack.alignment = UIStackViewAlignmentCenter;
+    headerStack.spacing = 6; // مسافة قريبة جداً ومثالية بين الكلمة والملصق
+    headerStack.translatesAutoresizingMaskIntoConstraints = NO;
+    [alertView addSubview:headerStack];
 
     UILabel *msgLabel = [[UILabel alloc] init];
     msgLabel.text = kAlertMessage;
@@ -171,23 +179,12 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
         [dotsContainer.widthAnchor constraintEqualToConstant:50],
         [dotsContainer.heightAnchor constraintEqualToConstant:12],
 
-        // Header Container يتوسط النافذة أفقياً بشكل دقيق
-        [headerContainer.topAnchor constraintEqualToAnchor:dotsContainer.bottomAnchor constant:10],
-        [headerContainer.centerXAnchor constraintEqualToAnchor:alertView.centerXAnchor],
-        [headerContainer.heightAnchor constraintEqualToConstant:70],
+        // الـ StackView يتوسط النافذة أفقياً بدقة
+        [headerStack.topAnchor constraintEqualToAnchor:dotsContainer.bottomAnchor constant:10],
+        [headerStack.centerXAnchor constraintEqualToAnchor:alertView.centerXAnchor],
+        [headerStack.heightAnchor constraintEqualToConstant:70],
 
-        // العنوان يبدأ من بداية الحاوية بداخلها
-        [titleLabel.leadingAnchor constraintEqualToAnchor:headerContainer.leadingAnchor],
-        [titleLabel.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
-
-        // الملصق مجاور تماماً للكلمة بمسافة صغيرة جداً (4 بكسل)
-        [gifImageView.leadingAnchor constraintEqualToAnchor:titleLabel.trailingAnchor constant:4],
-        [gifImageView.trailingAnchor constraintEqualToAnchor:headerContainer.trailingAnchor],
-        [gifImageView.centerYAnchor constraintEqualToAnchor:headerContainer.centerYAnchor],
-        [gifImageView.widthAnchor constraintEqualToConstant:70],
-        [gifImageView.heightAnchor constraintEqualToConstant:70],
-
-        [msgLabel.topAnchor constraintEqualToAnchor:headerContainer.bottomAnchor constant:12],
+        [msgLabel.topAnchor constraintEqualToAnchor:headerStack.bottomAnchor constant:12],
         [msgLabel.leadingAnchor constraintEqualToAnchor:alertView.leadingAnchor constant:16],
         [msgLabel.trailingAnchor constraintEqualToAnchor:alertView.trailingAnchor constant:-16],
 
@@ -250,6 +247,14 @@ static NSString * const kGifURL          = @"https://raw.githubusercontent.com/H
 
 __attribute__((constructor))
 static void initTweak(void) {
+    // تحميل الملصق مسبقاً في الخلفية لضمان ظهوره فوراً وبدون أي تأخير
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:kGifURL]];
+        if (data) {
+            gSharedGifData = data;
+        }
+    });
+
     [[NSNotificationCenter defaultCenter] addObserverForName:UIApplicationDidBecomeActiveNotification
                                                       object:nil
                                                        queue:[NSOperationQueue mainQueue]
